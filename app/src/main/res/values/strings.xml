@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">BudgetSplit</string>
+    
+    <!-- Navigation -->
+    <string name="navigation_home">Home</string>
+    <string name="navigation_history">History</string>
+    <string name="navigation_settings">Settings</string>
+    
+    <!-- Main Fragment -->
+    <string name="total_balance">Total Balance</string>
+    <string name="add_income">Add Income</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="edit_balance">Edit Balance</string>
+    <string name="necessities">Necessities</string>
+    <string name="wants">Wants</string>
+    <string name="savings">Savings</string>
+    <string name="budget_distribution">Budget Distribution</string>
+    <string name="money_sources">Money Sources</string>
+    <string name="no_money_sources">No money sources yet. Add one to get started!</string>
+    
+    <!-- History Fragment -->
+    <string name="income_history">Income History</string>
+    <string name="no_income_history">No income entries yet</string>
+    
+    <!-- Settings Fragment -->
+    <string name="budget_settings">Budget Settings</string>
+    <string name="necessities_percentage">Necessities (%)</string>
+    <string name="wants_percentage">Wants (%)</string>
+    <string name="savings_percentage">Savings (%)</string>
+    <string name="currency_selection">Currency</string>
+    <string name="save_settings">Save Settings</string>
+    <string name="percentage_total_error">Total percentage must equal 100%</string>
+    <string name="settings_saved">Settings saved successfully</string>
+    
+    <!-- Dialogs -->
+    <string name="add_income_title">Add Income</string>
+    <string name="add_expense_title">Add Expense</string>
+    <string name="add_money_source_title">Add Money Source</string>
+    <string name="edit_money_source_title">Edit Money Source</string>
+    <string name="edit_balance_title">Edit Total Balance</string>
+    <string name="amount_hint">Enter amount</string>
+    <string name="description_hint">Enter description (optional)</string>
+    <string name="source_name_hint">Enter source name (e.g., Bank, Cash, Wallet)</string>
+    <string name="money_source_hint">Select money source</string>
+    <string name="add_money_source">Add Money Source</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
+    <string name="save">Save</string>
+    <string name="update">Update</string>
+    <string name="invalid_amount">Please enter a valid amount</string>
+    
+    <!-- Format strings -->
+    <string name="currency_format">$%.2f</string>
+    <string name="percentage_format">%.1f%%</string>
+    <string name="date_format">MMM dd, yyyy</string>
+</resources>
