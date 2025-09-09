@@ -21,7 +21,6 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 
 import org.javakov.budgetsplit.ui.fragments.HistoryFragment;
 import org.javakov.budgetsplit.ui.fragments.MainFragment;
-import org.javakov.budgetsplit.ui.fragments.SettingsFragment;
 import org.javakov.budgetsplit.viewmodel.MainViewModel;
 
 public class MainActivity extends AppCompatActivity {
@@ -77,9 +76,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.navigation_history) {
                 selectedFragment = new HistoryFragment();
                 title = getString(R.string.navigation_history);
-            } else if (itemId == R.id.navigation_settings) {
-                selectedFragment = new SettingsFragment();
-                title = getString(R.string.navigation_settings);
             }
             
             if (selectedFragment != null) {
@@ -121,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(this, 
                     android.R.layout.simple_dropdown_item_1line, sourceNames);
                 spinnerMoneySource.setAdapter(adapter);
+                
+                // Auto-select the first money source
+                spinnerMoneySource.setText(sourceNames[0], false);
             }
         });
 
@@ -171,5 +170,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    public void navigateToHistory() {
+        bottomNavigation.setSelectedItemId(R.id.navigation_history);
     }
 }

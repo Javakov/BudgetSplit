@@ -3,6 +3,7 @@ package org.javakov.budgetsplit.database.entities;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 
 @Entity(tableName = "money_source_table")
 public class MoneySource {
@@ -18,10 +19,36 @@ public class MoneySource {
     @ColumnInfo(name = "date_created")
     public long dateCreated;
 
+    @ColumnInfo(name = "is_savings", defaultValue = "0")
+    public boolean isSavings;
+
+    @ColumnInfo(name = "currency", defaultValue = "'RUB'")
+    public String currency;
+
+    @Ignore
     public MoneySource(String name, double amount, long dateCreated) {
         this.name = name;
         this.amount = amount;
         this.dateCreated = dateCreated;
+        this.isSavings = false;
+        this.currency = "RUB";
+    }
+
+    @Ignore
+    public MoneySource(String name, double amount, long dateCreated, boolean isSavings) {
+        this.name = name;
+        this.amount = amount;
+        this.dateCreated = dateCreated;
+        this.isSavings = isSavings;
+        this.currency = "RUB";
+    }
+
+    public MoneySource(String name, double amount, long dateCreated, boolean isSavings, String currency) {
+        this.name = name;
+        this.amount = amount;
+        this.dateCreated = dateCreated;
+        this.isSavings = isSavings;
+        this.currency = currency != null ? currency : "RUB";
     }
 
     // Getters and setters
@@ -34,6 +61,9 @@ public class MoneySource {
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
 
-    public long getDateCreated() { return dateCreated; }
-    public void setDateCreated(long dateCreated) { this.dateCreated = dateCreated; }
+    public boolean isSavings() { return isSavings; }
+    public void setSavings(boolean savings) { this.isSavings = savings; }
+
+    public String getCurrency() { return currency; }
+    public void setCurrency(String currency) { this.currency = currency; }
 }

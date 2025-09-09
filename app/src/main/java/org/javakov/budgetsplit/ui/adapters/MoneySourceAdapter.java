@@ -14,13 +14,10 @@ import com.google.android.material.button.MaterialButton;
 
 import org.javakov.budgetsplit.R;
 import org.javakov.budgetsplit.database.entities.MoneySource;
-
-import java.text.NumberFormat;
-import java.util.Locale;
+import org.javakov.budgetsplit.utils.CurrencyFormatter;
 
 public class MoneySourceAdapter extends ListAdapter<MoneySource, MoneySourceAdapter.MoneySourceViewHolder> {
 
-    private final NumberFormat currencyFormat;
     private final OnDeleteClickListener onDeleteClickListener;
     private final OnEditClickListener onEditClickListener;
 
@@ -34,24 +31,25 @@ public class MoneySourceAdapter extends ListAdapter<MoneySource, MoneySourceAdap
 
     public MoneySourceAdapter(OnDeleteClickListener onDeleteClickListener, OnEditClickListener onEditClickListener) {
         super(DIFF_CALLBACK);
-        this.currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
         this.onDeleteClickListener = onDeleteClickListener;
         this.onEditClickListener = onEditClickListener;
     }
 
-    private static final DiffUtil.ItemCallback<MoneySource> DIFF_CALLBACK = 
-        new DiffUtil.ItemCallback<MoneySource>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull MoneySource oldItem, @NonNull MoneySource newItem) {
-                return oldItem.getId() == newItem.getId();
-            }
+    private static final DiffUtil.ItemCallback<MoneySource> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull MoneySource oldItem, @NonNull MoneySource newItem) {
+                    return oldItem.getId() == newItem.getId();
+                }
 
-            @Override
-            public boolean areContentsTheSame(@NonNull MoneySource oldItem, @NonNull MoneySource newItem) {
-                return oldItem.getName().equals(newItem.getName()) &&
-                       Double.compare(oldItem.getAmount(), newItem.getAmount()) == 0;
-            }
-        };
+                @Override
+                public boolean areContentsTheSame(@NonNull MoneySource oldItem, @NonNull MoneySource newItem) {
+                    return oldItem.getName().equals(newItem.getName()) &&
+                            Double.compare(oldItem.getAmount(), newItem.getAmount()) == 0 &&
+                            oldItem.isSavings() == newItem.isSavings() &&
+                            (oldItem.getCurrency() != null ? oldItem.getCurrency().equals(newItem.getCurrency()) : newItem.getCurrency() == null);
+                }
+            };
 
     @NonNull
     @Override
@@ -82,8 +80,13 @@ public class MoneySourceAdapter extends ListAdapter<MoneySource, MoneySourceAdap
         }
 
         public void bind(MoneySource moneySource) {
-            tvSourceName.setText(moneySource.getName());
-            tvSourceAmount.setText(currencyFormat.format(moneySource.getAmount()));
+            // Display name with savings indicator
+            String displayName = moneySource.getName();
+            tvSourceName.setText(displayName);
+            
+            // Use the money source's own currency instead of global currency
+            String sourceCurrency = moneySource.getCurrency() != null ? moneySource.getCurrency() : "RUB";
+            tvSourceAmount.setText(CurrencyFormatter.formatCurrency(moneySource.getAmount(), sourceCurrency));
             
             btnEditSource.setOnClickListener(v -> {
                 if (onEditClickListener != null) {

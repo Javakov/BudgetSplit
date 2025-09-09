@@ -9,9 +9,4 @@
         android:id="@+id/navigation_history"
         android:icon="@android:drawable/ic_menu_recent_history"
         android:title="@string/navigation_history" />
-
-    <item
-        android:id="@+id/navigation_settings"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:title="@string/navigation_settings" />
 </menu>

@@ -3,15 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     
     <item
-        android:id="@+id/action_add_income"
-        android:icon="@android:drawable/ic_menu_add"
-        android:title="@string/add_income"
-        app:showAsAction="ifRoom" />
-        
-    <item
-        android:id="@+id/action_add_expense"
-        android:icon="@android:drawable/ic_menu_revert"
-        android:title="@string/add_expense"
+        android:id="@+id/action_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/settings"
         app:showAsAction="ifRoom" />
         
 </menu>

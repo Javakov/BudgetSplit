@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 
+import org.javakov.budgetsplit.api.CurrencyExchangeService;
 import org.javakov.budgetsplit.database.entities.BudgetSettings;
 import org.javakov.budgetsplit.database.entities.Expense;
 import org.javakov.budgetsplit.database.entities.Income;
@@ -12,7 +13,6 @@ import org.javakov.budgetsplit.database.entities.MoneySource;
 import org.javakov.budgetsplit.repository.BudgetRepository;
 
 import java.util.List;
-import java.util.Objects;
 
 public class MainViewModel extends AndroidViewModel {
     private final BudgetRepository mRepository;
@@ -35,11 +35,10 @@ public class MainViewModel extends AndroidViewModel {
         mAllExpenses = mRepository.getAllExpenses();
         mBudgetSettings = mRepository.getBudgetSettings();
         
-        // Get total balance from money sources
+        // Get total balance from money sources with automatic currency conversion
         mTotalBalance = new MediatorLiveData<>();
-        LiveData<Double> totalMoneySourceAmount = mRepository.getTotalMoneySourceAmount();
-        mTotalBalance.addSource(totalMoneySourceAmount, amount ->
-                mTotalBalance.setValue(Objects.requireNonNullElse(amount, 0.0)));
+        LiveData<List<MoneySource>> allMoneySources = mRepository.getAllMoneySources();
+        mTotalBalance.addSource(allMoneySources, this::calculateTotalBalanceWithConversion);
         
         // Calculate distributions from total balance and percentages
         mTotalNecessities = new MediatorLiveData<>();
@@ -53,6 +52,46 @@ public class MainViewModel extends AndroidViewModel {
         mTotalSavings = new MediatorLiveData<>();
         mTotalSavings.addSource(mBudgetSettings, settings -> calculateDistributions());
         mTotalSavings.addSource(mTotalBalance, balance -> calculateDistributions());
+    }
+
+    private void calculateTotalBalanceWithConversion(List<MoneySource> sources) {
+        if (sources == null || sources.isEmpty()) {
+            mTotalBalance.setValue(0.0);
+            return;
+        }
+        
+        double rubTotal = 0.0;
+        double usdTotal = 0.0;
+        
+        // Sum up sources by currency
+        for (MoneySource source : sources) {
+            if ("RUB".equals(source.getCurrency()) || source.getCurrency() == null) {
+                rubTotal += source.getAmount();
+            } else if ("USD".equals(source.getCurrency())) {
+                usdTotal += source.getAmount();
+            }
+        }
+        
+        if (usdTotal == 0) {
+            // No USD sources, just set the RUB total immediately
+            mTotalBalance.setValue(rubTotal);
+        } else {
+            // Set RUB total first as fallback, then try to convert USD
+            mTotalBalance.setValue(rubTotal + usdTotal * 90.0); // Approximate fallback rate
+            
+            // Try to get real exchange rate for more accurate conversion
+            final double finalRubTotal = rubTotal;
+            final double finalUsdTotal = usdTotal;
+            CurrencyExchangeService.getExchangeRate("USD", "RUB")
+                .thenAccept(exchangeRate -> {
+                    double convertedUsd = CurrencyExchangeService.convertAmount(finalUsdTotal, exchangeRate.rate);
+                    mTotalBalance.setValue(finalRubTotal + convertedUsd);
+                })
+                .exceptionally(throwable -> {
+                    // Keep the fallback value we already set
+                    return null;
+                });
+        }
     }
 
     private void calculateDistributions() {
@@ -98,10 +137,6 @@ public class MainViewModel extends AndroidViewModel {
         return mTotalBalance;
     }
 
-    public void addIncome(double amount, String description) {
-        mRepository.addIncomeAsync(amount, description);
-    }
-
     public void addIncomeWithSource(double amount, String description, String sourceName) {
         mRepository.addIncomeWithSourceAsync(amount, description, sourceName);
     }
@@ -110,9 +145,9 @@ public class MainViewModel extends AndroidViewModel {
         mRepository.addExpenseWithSourceAsync(amount, description, sourceName);
     }
 
-    public void addMoneySource(String name, double amount) {
+    public void addMoneySource(String name, double amount, boolean isSavings, String currency) {
         long currentTime = System.currentTimeMillis();
-        MoneySource moneySource = new MoneySource(name, amount, currentTime);
+        MoneySource moneySource = new MoneySource(name, amount, currentTime, isSavings, currency);
         mRepository.insertMoneySource(moneySource);
     }
 

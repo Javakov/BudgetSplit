@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import org.javakov.budgetsplit.database.dao.BudgetSettingsDao;
@@ -24,7 +25,7 @@ import java.util.concurrent.Executors;
 
 @Database(
     entities = {Income.class, Distribution.class, BudgetSettings.class, MoneySource.class, Expense.class},
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 public abstract class BudgetDatabase extends RoomDatabase {
@@ -40,12 +41,24 @@ public abstract class BudgetDatabase extends RoomDatabase {
     public static final ExecutorService databaseWriteExecutor = 
         Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
+    // Migration from version 5 to 6
+    static final Migration MIGRATION_5_6 = new Migration(5, 6) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            // Add is_savings column to money_source_table
+            database.execSQL("ALTER TABLE money_source_table ADD COLUMN is_savings INTEGER NOT NULL DEFAULT 0");
+            // Add currency column to money_source_table (nullable with default)
+            database.execSQL("ALTER TABLE money_source_table ADD COLUMN currency TEXT DEFAULT 'RUB'");
+        }
+    };
+
     public static BudgetDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (BudgetDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             BudgetDatabase.class, "budget_database")
+                            .addMigrations(MIGRATION_5_6)
                             .fallbackToDestructiveMigration()
                             .addCallback(sRoomDatabaseCallback)
                             .build();
